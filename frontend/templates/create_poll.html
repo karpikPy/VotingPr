@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+
+{% block title %}Create New Poll - Poll App{% endblock %}
+
+{% block content %}
+    <h1 class="mb-4">Create New Poll</h1>
+    <form id="create-poll-form">
+        <div class="mb-3">
+            <label for="poll-title" class="form-label">Poll Title</label>
+            <input type="text" class="form-control" id="poll-title" name="title" required>
+        </div>
+        <div id="options-container">
+            <div class="mb-3">
+                <label for="option-1" class="form-label">Option 1</label>
+                <input type="text" class="form-control" id="option-1" name="options[]" required>
+            </div>
+            <div class="mb-3">
+                <label for="option-2" class="form-label">Option 2</label>
+                <input type="text" class="form-control" id="option-2" name="options[]" required>
+            </div>
+        </div>
+        <button type="button" class="btn btn-secondary mb-3" id="add-option-btn">Add Option</button>
+        <button type="submit" class="btn btn-primary">Create Poll</button>
+    </form>
+
+    <script>
+        document.getElementById('add-option-btn').addEventListener('click', function() {
+            const optionsContainer = document.getElementById('options-container');
+            const optionCount = optionsContainer.children.length + 1;
+            const newOptionDiv = document.createElement('div');
+            newOptionDiv.classList.add('mb-3');
+            newOptionDiv.innerHTML = `
+                <label for="option-${optionCount}" class="form-label">Option ${optionCount}</label>
+                <input type="text" class="form-control" id="option-${optionCount}" name="options[]" required>
+            `;
+            optionsContainer.appendChild(newOptionDiv);
+        });
+
+        document.getElementById('create-poll-form').addEventListener('submit', async function(event) {
+            event.preventDefault();
+
+            const title = document.getElementById('poll-title').value;
+            const optionInputs = document.querySelectorAll('#options-container input[name="options[]"]');
+            const options = Array.from(optionInputs).map(input => ({ text: input.value }));
+
+            // Спочатку створюємо опитування
+            const pollResponse = await fetch('/polls/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ title: title }),
+            });
+
+            if (!pollResponse.ok) {
+                alert('Failed to create poll');
+                return;
+            }
+
+            const poll = await pollResponse.json();
+            const pollId = poll.id;
+
+            // Потім додаємо опції до створеного опитування
+            for (const option of options) {
+                const optionResponse = await fetch(`/polls/${pollId}/options/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ text: option.text }), // Надсилаємо тільки текст опції
+                });
+
+                if (!optionResponse.ok) {
+                    alert(`Failed to add option: ${option.text}`);
+                    // Можливо, варто видалити створене опитування, якщо опції не додались
+                    return;
+                }
+            }
+
+            alert('Poll created successfully!');
+            window.location.href = '/polls_page'; // Перенаправляємо на сторінку зі списком опитувань
+        });
+    </script>
+{% endblock %}

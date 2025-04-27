@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block title %}Register - Poll App{% endblock %}
+
+{% block content %}
+    <h1 class="mb-4">Register</h1>
+    <form id="register-form"> {# Додаємо ID для форми #}
+        <div class="mb-3">
+            <label for="username" class="form-label">Username</label>
+            <input type="text" class="form-control" id="username" name="username" required>
+        </div>
+        <div class="mb-3">
+            <label for="email" class="form-label">Email address</label>
+            <input type="email" class="form-control" id="email" name="email" required>
+        </div>
+        <div class="mb-3">
+            <label for="password" class="form-label">Password</label>
+            <input type="password" class="form-control" id="password" name="password" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Register</button>
+    </form>
+    <p class="mt-3">Already have an account? <a href="/login">Login here</a>.</p>
+
+    <script>
+        document.getElementById('register-form').addEventListener('submit', async function(event) {
+            event.preventDefault(); 
+
+            const form = event.target;
+            const formData = new FormData(form);
+            
+
+            try {
+                const response = await fetch('/register', {
+                    method: 'POST',
+                     
+                    body: formData
+                });
+
+                const result = await response.json(); 
+
+                if (response.ok) { 
+                    const token = result.access_token;
+                    localStorage.setItem('access_token', token); 
+                    localStorage.setItem('success_message', 'Ви успішно зареєструвались та увійшли!'); // Зберігаємо повідомлення
+
+                    window.location.href = '/home'; 
+                } else {
+                    const errorMessage = result.detail || 'Помилка реєстрації. Спробуйте інший email.';
+                    alert(errorMessage); 
+                }
+            } catch (error) {
+                console.error('Registration failed:', error);
+                alert('Виникла помилка під час реєстрації.');
+            }
+        });
+    </script>
+{% endblock %}

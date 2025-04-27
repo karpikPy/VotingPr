@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block title %}Login - Poll App{% endblock %}
+
+{% block content %}
+    <h1 class="mb-4">Login</h1>
+    <form id="login-form"> {# Додаємо ID для форми #}
+        <div class="mb-3">
+            <label for="email" class="form-label">Email address</label>
+            <input type="email" class="form-control" id="email" name="email" required>
+        </div>
+        <div class="mb-3">
+            <label for="password" class="form-label">Password</label>
+            <input type="password" class="form-control" id="password" name="password" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Login</button>
+    </form>
+    <p class="mt-3">Don't have an account? <a href="/register">Register here</a>.</p>
+
+    <script>
+        document.getElementById('login-form').addEventListener('submit', async function(event) {
+            event.preventDefault(); 
+
+            const form = event.target;
+            const formData = new FormData(form);
+            const email = formData.get('email');
+            const password = formData.get('password');
+
+            try {
+                const response = await fetch('/login', {
+                    method: 'POST',
+                    
+                    body: formData
+                });
+
+                const result = await response.json(); 
+
+                if (response.ok) { 
+                    
+                    const token = result.access_token;
+                    localStorage.setItem('access_token', token); 
+                    localStorage.setItem('success_message', 'Ви успішно увійшли!'); 
+
+                    window.location.href = '/home'; 
+                } else {
+                    
+                    const errorMessage = result.detail || 'Помилка входу. Перевірте email та пароль.';
+                    alert(errorMessage); 
+                }
+            } catch (error) {
+                console.error('Login failed:', error);
+                alert('Виникла помилка під час входу.');
+            }
+        });
+    </script>
+{% endblock %}
+

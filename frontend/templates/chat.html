@@ -1,0 +1,201 @@
+{% extends "base.html" %}
+
+{% block title %}Chat - Poll App{% endblock %}
+
+{% block content %}
+    <h1 class="mb-4">Chat with User <span id="chat-partner-id">...</span></h1> {# Placeholder for partner ID #}
+
+    <div id="chat-box" class="border p-3 mb-3" style="height: 400px; overflow-y: scroll;">
+        {# Messages will be loaded here by JavaScript #}
+        <p>Loading messages...</p>
+    </div>
+
+    <div class="input-group mb-3">
+        <input type="text" class="form-control" id="message-input" placeholder="Enter your message">
+        <button class="btn btn-primary" type="button" id="send-button">Send</button>
+    </div>
+
+    <script>
+        let currentUserId = null;
+        let chatPartnerId = null; 
+
+        
+        async function fetchCurrentUser() {
+            const token = localStorage.getItem('access_token');
+            if (!token) {
+                alert('You must be logged in to chat.');
+                window.location.href = '/login'; 
+                return null;
+            }
+
+            try {
+                const response = await fetch('/users/me', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.ok) {
+                    const user = await response.json();
+                    currentUserId = user.id;
+                    return user;
+                } else {
+                     
+                    alert('Failed to fetch user info. Please log in again.');
+                    localStorage.removeItem('access_token');
+                    window.location.href = '/login';
+                    return null;
+                }
+            } catch (error) {
+                console.error('Failed to fetch current user:', error);
+                 alert('An error occurred while fetching user info.');
+                 localStorage.removeItem('access_token');
+                 window.location.href = '/login';
+                 return null;
+            }
+        }
+
+       
+        function getChatPartnerIdFromUrl() {
+            const pathSegments = window.location.pathname.split('/');
+       
+            if (pathSegments.length > 2 && pathSegments[1] === 'chat') {
+                return parseInt(pathSegments[2]);
+            }
+            return null; 
+        }
+
+        
+        async function fetchMessages() {
+            if (currentUserId === null || chatPartnerId === null) {
+                console.warn("Cannot fetch messages: User IDs not available.");
+                return;
+            }
+
+            const token = localStorage.getItem('access_token');
+             if (!token) {
+                 console.warn("Cannot fetch messages: No access token.");
+                 return;
+             }
+
+            try {
+                const response = await fetch(`/messages/${chatPartnerId}`, {
+                     headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                const chatBox = document.getElementById('chat-box');
+                chatBox.innerHTML = ''; 
+
+                if (response.ok) {
+                    const messages = await response.json();
+                    if (messages.length === 0) {
+                        chatBox.innerHTML = '<p>No messages yet.</p>';
+                    } else {
+                        messages.forEach(message => {
+                            const messageElement = document.createElement('div');
+                            
+                            messageElement.classList.add(message.sender_id === currentUserId ? 'text-end' : 'text-start');
+                            messageElement.textContent = `${message.sender_id === currentUserId ? 'You' : 'User ' + message.sender_id}: ${message.content}`; // Можна покращити відображення імені
+                            chatBox.appendChild(messageElement);
+                        });
+                        
+                        chatBox.scrollTop = chatBox.scrollHeight;
+                    }
+                } else {
+                     console.error('Failed to fetch messages:', response.status, await response.text());
+                     chatBox.innerHTML = '<p>Error loading messages.</p>';
+                }
+            } catch (error) {
+                console.error('Error fetching messages:', error);
+                 const chatBox = document.getElementById('chat-box');
+                 chatBox.innerHTML = '<p>Error loading messages.</p>';
+            }
+        }
+
+        
+        async function sendMessage() {
+             if (currentUserId === null || chatPartnerId === null) {
+                alert("Cannot send message: User IDs not available.");
+                return;
+            }
+
+            const messageInput = document.getElementById('message-input');
+            const messageContent = messageInput.value.trim();
+
+            if (messageContent === '') {
+                return; 
+            }
+
+            const token = localStorage.getItem('access_token');
+             if (!token) {
+                 alert('You must be logged in to send messages.');
+                 window.location.href = '/login';
+                 return;
+             }
+
+            try {
+                const response = await fetch('/send_message', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        sender_id: currentUserId,
+                        receiver_id: chatPartnerId,
+                        content: messageContent
+                    })
+                });
+
+                if (response.ok) {
+                    messageInput.value = ''; 
+                    fetchMessages(); 
+                } else {
+                    console.error('Failed to send message:', response.status, await response.text());
+                    alert('Failed to send message.');
+                }
+            } catch (error) {
+                console.error('Error sending message:', error);
+                alert('An error occurred while sending the message.');
+            }
+        }
+
+        
+        async function initChatPage() {
+            const currentUser = await fetchCurrentUser();
+            if (!currentUser) {
+                return; 
+            }
+
+            chatPartnerId = getChatPartnerIdFromUrl();
+            if (chatPartnerId === null || isNaN(chatPartnerId)) {
+                alert('Invalid chat partner ID.');
+            
+                return;
+            }
+
+            document.getElementById('chat-partner-id').textContent = chatPartnerId; 
+
+            
+            fetchMessages();
+
+            document.getElementById('send-button').addEventListener('click', sendMessage);
+
+            
+            document.getElementById('message-input').addEventListener('keypress', function(event) {
+                if (event.key === 'Enter') {
+                    event.preventDefault(); 
+                    sendMessage();
+                }
+            });
+
+             
+        }
+
+        
+        initChatPage();
+
+    </script>
+{% endblock %}

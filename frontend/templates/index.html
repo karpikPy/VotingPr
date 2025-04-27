@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block title %}Home - Poll App{% endblock %}
+
+{% block content %}
+    <div id="message-area" class="alert d-none" role="alert">
+        {# Success message will be displayed here #}
+    </div>
+
+    <h1>Welcome to the Poll App!</h1>
+    <p>This is the home page.</p>
+    <p><a href="/polls_page" class="btn btn-primary">View Polls</a></p>
+
+    <hr> {# Додаємо розділювач #}
+
+    <h2>Start a Chat</h2>
+    <div class="input-group mb-3">
+        <input type="number" class="form-control" id="chat-user-id-input" placeholder="Enter User ID to chat with">
+        <button class="btn btn-secondary" type="button" id="start-chat-button">Start Chat</button>
+    </div>
+    <p id="chat-login-warning" class="text-danger d-none">Please log in to start a chat.</p> {# Попередження, якщо не залогінений #}
+
+
+    <script>
+        const successMessage = localStorage.getItem('success_message');
+        const messageArea = document.getElementById('message-area');
+
+        if (successMessage) {
+            messageArea.textContent = successMessage;
+            messageArea.classList.remove('d-none'); 
+            messageArea.classList.add('alert-success'); 
+
+   
+            localStorage.removeItem('success_message');
+
+        }
+
+
+        const startChatButton = document.getElementById('start-chat-button');
+        const chatUserIdInput = document.getElementById('chat-user-id-input');
+        const chatLoginWarning = document.getElementById('chat-login-warning');
+
+        startChatButton.addEventListener('click', function() {
+            const token = localStorage.getItem('access_token');
+
+            if (!token) {
+
+                chatLoginWarning.classList.remove('d-none');
+                return;
+            }
+
+   
+            chatLoginWarning.classList.add('d-none');
+
+            const userIdToChatWith = chatUserIdInput.value.trim();
+
+            if (userIdToChatWith && !isNaN(userIdToChatWith)) {
+
+                window.location.href = `/chat/${userIdToChatWith}`;
+            } else {
+                alert('Please enter a valid User ID.');
+            }
+        });
+
+        if (localStorage.getItem('access_token')) {
+             chatLoginWarning.classList.add('d-none');
+        } else {
+             chatLoginWarning.classList.remove('d-none');
+        }
+
+    </script>
+{% endblock %}
