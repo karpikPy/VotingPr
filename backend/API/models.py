@@ -15,6 +15,8 @@ class User(Base):
     messages_sent = relationship("ChatMessage", back_populates="sender", foreign_keys="ChatMessage.sender_id")
     messages_received = relationship("ChatMessage", back_populates="receiver", foreign_keys="ChatMessage.receiver_id")
 
+    created_polls = relationship("Poll", back_populates="creator")
+
 
 class ChatMessage(Base):
     __tablename__ = "chat_messages"
