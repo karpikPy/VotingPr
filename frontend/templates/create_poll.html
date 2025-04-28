@@ -43,42 +43,55 @@
             const optionInputs = document.querySelectorAll('#options-container input[name="options[]"]');
             const options = Array.from(optionInputs).map(input => ({ text: input.value }));
 
-            // Спочатку створюємо опитування
-            const pollResponse = await fetch('/polls/', {
+            const token = localStorage.getItem('access_token'); 
+
+            if (!token) {
+                alert('You must be logged in to create polls.');
+                
+                return; 
+            }
+
+            const pollResponse = await fetch('/polls', { 
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
                 },
                 body: JSON.stringify({ title: title }),
             });
 
             if (!pollResponse.ok) {
-                alert('Failed to create poll');
+                 if (pollResponse.status === 401 || pollResponse.status === 403) {
+                     alert('You are not authorized to create polls. Please log in.');
+                 } else {
+                    alert('Failed to create poll.');
+                 }
                 return;
             }
 
             const poll = await pollResponse.json();
             const pollId = poll.id;
 
-            // Потім додаємо опції до створеного опитування
             for (const option of options) {
                 const optionResponse = await fetch(`/polls/${pollId}/options/`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
+
                     },
-                    body: JSON.stringify({ text: option.text }), // Надсилаємо тільки текст опції
+                    body: JSON.stringify({ text: option.text }),
                 });
 
                 if (!optionResponse.ok) {
                     alert(`Failed to add option: ${option.text}`);
-                    // Можливо, варто видалити створене опитування, якщо опції не додались
+
                     return;
                 }
             }
 
             alert('Poll created successfully!');
-            window.location.href = '/polls_page'; // Перенаправляємо на сторінку зі списком опитувань
+            window.location.href = '/polls_page'; 
         });
     </script>
 {% endblock %}
+
