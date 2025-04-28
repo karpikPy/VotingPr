@@ -35,6 +35,7 @@ class Poll(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     expires_at = Column(DateTime, nullable=True)
     is_active = Column(Boolean, default=True)
+    creator_id = Column(Integer, ForeignKey("users.id")) 
 
     options = relationship("PollOption", back_populates="poll", cascade="all, delete")
 
