@@ -21,24 +21,22 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <form id="edit-poll-form">
-                        <input type="hidden" id="edit-poll-id"> {# Приховане поле для зберігання ID опитування #}
-                        <div class="mb-3">
-                            <label for="edit-poll-title" class="form-label">Poll Title</label>
-                            <input type="text" class="form-control" id="edit-poll-title" required>
-                        </div>
-                        {# Опції опитування можна відобразити тут для редагування, але для простоти редагуємо їх окремо #}
-                    </form>
+                    <input type="hidden" id="edit-poll-id">
+                    <div class="mb-3">
+                        <label for="edit-poll-title" class="form-label">Poll Title</label>
+                        <input type="text" class="form-control" id="edit-poll-title" required>
+                    </div>
+                    {# Можна додати поля для редагування опцій тут або в окремому модальному вікні #}
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" form="edit-poll-form" class="btn btn-primary">Save Changes</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="save-poll-changes-btn">Save changes</button>
                 </div>
             </div>
         </div>
     </div>
 
-    {# Модальне вікно для редагування опції опитування #}
+     {# Модальне вікно для редагування опції #}
     <div class="modal fade" id="editOptionModal" tabindex="-1" aria-labelledby="editOptionModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -47,17 +45,15 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <form id="edit-option-form">
-                        <input type="hidden" id="edit-option-id"> {# Приховане поле для зберігання ID опції #}
-                        <div class="mb-3">
-                            <label for="edit-option-text" class="form-label">Option Text</label>
-                            <input type="text" class="form-control" id="edit-option-text" required>
-                        </div>
-                    </form>
+                    <input type="hidden" id="edit-option-id">
+                    <div class="mb-3">
+                        <label for="edit-option-text" class="form-label">Option Text</label>
+                        <input type="text" class="form-control" id="edit-option-text" required>
+                    </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" form="edit-option-form" class="btn btn-primary">Save Changes</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="save-option-changes-btn">Save changes</button>
                 </div>
             </div>
         </div>
@@ -65,15 +61,15 @@
 
 
     <script>
+        let currentUserId = null; 
         let isAdmin = false; 
-        let allPolls = []; 
 
-        
         async function fetchCurrentUser() {
             const token = localStorage.getItem('access_token');
             if (!token) {
+                currentUserId = null;
                 isAdmin = false;
-                return;
+                return null;
             }
 
             try {
@@ -85,29 +81,36 @@
 
                 if (response.ok) {
                     const user = await response.json();
+                    currentUserId = user.id;
                     isAdmin = user.is_admin;
+                    return user;
                 } else {
+                    currentUserId = null;
                     isAdmin = false;
+                  
+                    return null;
                 }
             } catch (error) {
                 console.error('Failed to fetch current user:', error);
+                currentUserId = null;
                 isAdmin = false;
+                return null;
             }
         }
 
-        
+
         async function fetchPolls() {
             const response = await fetch('/polls');
-            allPolls = await response.json(); 
+            const polls = await response.json();
             const pollsListDiv = document.getElementById('polls-list');
             pollsListDiv.innerHTML = ''; 
 
-            if (allPolls.length === 0) {
+            if (polls.length === 0) {
                 pollsListDiv.innerHTML = '<p>No polls available yet.</p>';
                 return;
             }
 
-            allPolls.forEach(poll => {
+            polls.forEach(poll => {
                 const pollElement = document.createElement('div');
                 pollElement.classList.add('card', 'mb-3');
                 pollElement.innerHTML = `
@@ -119,14 +122,14 @@
                                     ${option.text}
                                     <span class="badge bg-primary rounded-pill">${option.votes} votes</span>
                                     <button class="btn btn-sm btn-outline-primary vote-btn" data-option-id="${option.id}">Vote</button>
-                                    ${isAdmin ? `<button class="btn btn-sm btn-outline-secondary edit-option-btn ms-2" data-option-id="${option.id}" data-bs-toggle="modal" data-bs-target="#editOptionModal">Edit Option</button>` : ''} {# Додано data-bs-toggle та data-bs-target #}
+                                    ${(isAdmin || (currentUserId !== null && poll.creator_id === currentUserId)) ? `<button class="btn btn-sm btn-outline-secondary edit-option-btn ms-2" data-option-id="${option.id}" data-option-text="${option.text}">Edit Option</button>` : ''} {# Кнопка редагування опції для адміна або творця #}
                                 </li>
                             `).join('')}
                         </ul>
-                        ${isAdmin ? `
+                        ${(isAdmin || (currentUserId !== null && poll.creator_id === currentUserId)) ? `
                             <div class="mt-3">
-                                <button class="btn btn-sm btn-outline-danger delete-poll-btn" data-poll-id="${poll.id}">Delete Poll</button>
-                                <button class="btn btn-sm btn-outline-secondary edit-poll-btn ms-2" data-poll-id="${poll.id}" data-bs-toggle="modal" data-bs-target="#editPollModal">Edit Poll</button> {# Додано data-bs-toggle та data-bs-target #}
+                                <button class="btn btn-sm btn-outline-danger delete-poll-btn" data-poll-id="${poll.id}">Delete Poll</button> {# Кнопка видалення опитування для адміна або творця #}
+                                <button class="btn btn-sm btn-outline-secondary edit-poll-btn ms-2" data-poll-id="${poll.id}" data-poll-title="${poll.title}">Edit Poll</button> {# Кнопка редагування опитування для адміна або творця #}
                             </div>
                         ` : ''}
                     </div>
@@ -134,7 +137,7 @@
                 pollsListDiv.appendChild(pollElement);
             });
 
-            
+
             document.querySelectorAll('.vote-btn').forEach(button => {
                 button.addEventListener('click', async function() {
                     const optionId = this.dataset.optionId;
@@ -163,82 +166,76 @@
             });
 
 
-            if (isAdmin) {
-
-                document.querySelectorAll('.delete-poll-btn').forEach(button => {
-                    button.addEventListener('click', async function() {
-                        const pollId = this.dataset.pollId;
-                        if (confirm('Are you sure you want to delete this poll?')) {
-                            const token = localStorage.getItem('access_token');
-                            try {
-                                const response = await fetch(`/polls/${pollId}`, {
-                                    method: 'DELETE',
-                                    headers: {
-                                        'Authorization': `Bearer ${token}`
-                                    }
-                                });
-
-                                if (response.ok) {
-                                    alert('Poll deleted successfully!');
-                                    fetchPolls(); 
-                                } else if (response.status === 401 || response.status === 403) {
-                                     alert('You are not authorized to delete polls.');
+            document.querySelectorAll('.delete-poll-btn').forEach(button => {
+                button.addEventListener('click', async function() {
+                    const pollId = this.dataset.pollId;
+                    if (confirm('Are you sure you want to delete this poll?')) {
+                        const token = localStorage.getItem('access_token');
+                        if (!token) {
+                             alert('You must be logged in to delete polls.');
+                             return;
+                        }
+                        try {
+                            const response = await fetch(`/polls/${pollId}`, {
+                                method: 'DELETE',
+                                headers: {
+                                    'Authorization': `Bearer ${token}`
                                 }
-                                else {
-                                    alert('Failed to delete poll.');
-                                }
-                            } catch (error) {
-                                console.error('Delete poll failed:', error);
-                                alert('An error occurred while deleting the poll.');
+                            });
+
+                            if (response.ok) {
+                                alert('Poll deleted successfully!');
+                                fetchPolls(); 
+                            } else if (response.status === 401 || response.status === 403) {
+                                 alert('You are not authorized to delete this poll.');
                             }
+                            else {
+                                alert('Failed to delete poll.');
+                            }
+                        } catch (error) {
+                            console.error('Delete poll failed:', error);
+                            alert('An error occurred while deleting the poll.');
                         }
-                    });
+                    }
                 });
+            });
 
- 
-                document.querySelectorAll('.edit-poll-btn').forEach(button => {
-                    button.addEventListener('click', function() {
-                        const pollId = parseInt(this.dataset.pollId);
-
-                        const pollToEdit = allPolls.find(poll => poll.id === pollId);
-                        if (pollToEdit) {
-
-                            document.getElementById('edit-poll-id').value = pollToEdit.id;
-                            document.getElementById('edit-poll-title').value = pollToEdit.title;
- 
-                        }
-                    });
+            document.querySelectorAll('.edit-poll-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const pollId = this.dataset.pollId;
+                    const pollTitle = this.dataset.pollTitle;
+                    document.getElementById('edit-poll-id').value = pollId;
+                    document.getElementById('edit-poll-title').value = pollTitle;
+                    const editPollModal = new bootstrap.Modal(document.getElementById('editPollModal'));
+                    editPollModal.show();
                 });
+            });
 
 
-                document.querySelectorAll('.edit-option-btn').forEach(button => {
-                    button.addEventListener('click', function() {
-                        const optionId = parseInt(this.dataset.optionId);
-  
-                        let optionToEdit = null;
-                        for (const poll of allPolls) {
-                            optionToEdit = poll.options.find(option => option.id === optionId);
-                            if (optionToEdit) break;
-                        }
+            document.querySelectorAll('.edit-option-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const optionId = this.dataset.optionId;
+                    const optionText = this.dataset.optionText;
 
-                        if (optionToEdit) {
+                    document.getElementById('edit-option-id').value = optionId;
+                    document.getElementById('edit-option-text').value = optionText;
 
-                            document.getElementById('edit-option-id').value = optionToEdit.id;
-                            document.getElementById('edit-option-text').value = optionToEdit.text;
-
-                        }
-                    });
+                    const editOptionModal = new bootstrap.Modal(document.getElementById('editOptionModal'));
+                    editOptionModal.show();
                 });
-            }
+            });
         }
 
 
-        document.getElementById('edit-poll-form').addEventListener('submit', async function(event) {
-            event.preventDefault();
-
+        document.getElementById('save-poll-changes-btn').addEventListener('click', async function() {
             const pollId = document.getElementById('edit-poll-id').value;
             const newTitle = document.getElementById('edit-poll-title').value;
             const token = localStorage.getItem('access_token');
+
+            if (!token) {
+                 alert('You must be logged in to edit polls.');
+                 return;
+            }
 
             try {
                 const response = await fetch(`/polls/${pollId}`, {
@@ -247,17 +244,17 @@
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${token}`
                     },
-                    body: JSON.stringify({ title: newTitle }),
+                    body: JSON.stringify({ title: newTitle })
                 });
 
                 if (response.ok) {
                     alert('Poll updated successfully!');
 
-                    const modal = bootstrap.Modal.getInstance(document.getElementById('editPollModal'));
-                    modal.hide();
+                    const editPollModal = bootstrap.Modal.getInstance(document.getElementById('editPollModal'));
+                    editPollModal.hide();
                     fetchPolls(); 
                 } else if (response.status === 401 || response.status === 403) {
-                     alert('You are not authorized to edit polls.');
+                     alert('You are not authorized to edit this poll.');
                 }
                 else {
                     alert('Failed to update poll.');
@@ -268,13 +265,15 @@
             }
         });
 
-
-        document.getElementById('edit-option-form').addEventListener('submit', async function(event) {
-            event.preventDefault();
-
+        document.getElementById('save-option-changes-btn').addEventListener('click', async function() {
             const optionId = document.getElementById('edit-option-id').value;
             const newText = document.getElementById('edit-option-text').value;
             const token = localStorage.getItem('access_token');
+
+            if (!token) {
+                 alert('You must be logged in to edit options.');
+                 return;
+            }
 
             try {
                 const response = await fetch(`/polls/options/${optionId}`, {
@@ -283,17 +282,17 @@
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${token}`
                     },
-                    body: JSON.stringify({ text: newText }),
+                    body: JSON.stringify({ text: newText })
                 });
 
                 if (response.ok) {
                     alert('Option updated successfully!');
- 
-                    const modal = bootstrap.Modal.getInstance(document.getElementById('editOptionModal'));
-                    modal.hide();
+
+                    const editOptionModal = bootstrap.Modal.getInstance(document.getElementById('editOptionModal'));
+                    editOptionModal.hide();
                     fetchPolls(); 
                 } else if (response.status === 401 || response.status === 403) {
-                     alert('You are not authorized to edit options.');
+                     alert('You are not authorized to edit this option.');
                 }
                 else {
                     alert('Failed to update option.');
@@ -304,10 +303,11 @@
             }
         });
 
-        
+
         fetchCurrentUser().then(() => {
             fetchPolls();
         });
 
     </script>
 {% endblock %}
+
