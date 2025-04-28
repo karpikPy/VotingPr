@@ -41,6 +41,7 @@ class Poll(PollBase):
     created_at: datetime
     expires_at: Optional[datetime] = None
     is_active: bool
+    creator_id: int 
     options: List[PollOption] = [] 
 
     class Config:
