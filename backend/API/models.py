@@ -38,6 +38,7 @@ class Poll(Base):
     creator_id = Column(Integer, ForeignKey("users.id")) 
 
     options = relationship("PollOption", back_populates="poll", cascade="all, delete")
+    creator = relationship("User", back_populates="created_polls") 
 
 class PollOption(Base):
     __tablename__ = 'poll_options'
