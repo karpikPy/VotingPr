@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="uk" data-bs-theme="light">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -19,34 +19,34 @@
 </head>
 <body class="bg-light">
   <div class="container py-5">
-    <h1 class="text-center mb-5">Список опросов</h1>
+    <h1 class="text-center mb-5">Список опитуваннь</h1>
 
     <div class="row justify-content-center mb-4 g-3">
       <div class="col-md-3">
-        <label for="activityFilter" class="form-label">Активность:</label>
+        <label for="activityFilter" class="form-label">Активність:</label>
         <select id="activityFilter" class="form-select">
-          <option value="all">Все</option>
-          <option value="active">Активные</option>
-          <option value="inactive">Завершённые</option>
+          <option value="all">Всі</option>
+          <option value="active">Активні</option>
+          <option value="inactive">Завершенні</option>
         </select>
       </div>
       <div class="col-md-3">
-        <label for="timeFilter" class="form-label">Период:</label>
+        <label for="timeFilter" class="form-label">Період:</label>
         <select id="timeFilter" class="form-select">
-          <option value="all">Все</option>
-          <option value="today">Сегодня</option>
-          <option value="week">Эта неделя</option>
-          <option value="month">Этот месяц</option>
+          <option value="all">Всі</option>
+          <option value="today">Сьогодні</option>
+          <option value="week">Ця неділя</option>
+          <option value="month">Цей місяць</option>
         </select>
       </div>
       <div class="col-md-2 d-flex align-items-end">
-        <button class="btn btn-primary w-100" onclick="loadPolls()">Применить</button>
+        <button class="btn btn-primary w-100" onclick="loadPolls()">Застосувати</button>
       </div>
     </div>
 
     <div id="loadingSpinner" class="d-none text-center mb-4">
       <div class="spinner-border text-primary" role="status">
-        <span class="visually-hidden">Загрузка...</span>
+        <span class="visually-hidden">Завантаження...</span>
       </div>
     </div>
 
@@ -59,19 +59,20 @@
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title">Подтверждение</h5>
+          <h5 class="modal-title">Підтвердження</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
         </div>
         <div class="modal-body">
-          Вы действительно хотите перейти к этому опросу?
+          Ви справді хочете перейти до цього запиту
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Ні</button>
           <button type="button" class="btn btn-success" id="confirmGoBtn">Перейти</button>
         </div>
       </div>
     </div>
   </div>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  
 </body>
 </html>
