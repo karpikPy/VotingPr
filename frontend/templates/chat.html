@@ -14,6 +14,64 @@
         <button class="btn btn-primary" type="button" id="send-button">Send</button>
     </div>
 
+<style>
+    #chat-box {
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        padding: 10px;
+        font-family: Arial, sans-serif;
+    }
+
+    #chat-box div {
+        margin-bottom: 8px;
+        padding: 6px 10px;
+        border-radius: 6px;
+        display: block; /* <-- это ключевой момент */
+        width: fit-content;
+        max-width: 70%;
+        clear: both;
+    }
+
+    .text-start {
+        background-color: #e9ecef;
+        color: #000;
+        float: left;
+    }
+
+    .text-end {
+        background-color: #007bff;
+        color: white;
+        float: right;
+    }
+
+    #message-input {
+        font-size: 16px;
+    }
+
+    #send-button {
+        font-size: 16px;
+    }
+
+    body {
+    background: linear-gradient(135deg, #a8c0ff, #3f7cac); /* Градиент синий/голубой */
+    background-size: 100% 100%; /* Растягиваем градиент на весь экран */
+    background-attachment: fixed; /* Фон будет фиксирован на экране */
+    background-position: center;
+    font-family: 'Arial', sans-serif;
+    color: #333;
+    height: 100vh; /* Задаем высоту 100% от экрана */
+    margin: 0; /* Убираем отступы */
+  }
+
+  /* Фон для контейнера с контентом */
+  .container {
+    background: rgba(255, 255, 255, 0.85); /* Белый фон с прозрачностью */
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+  }
+</style>
+
     <script>
         let currentUserId = null;
         let chatPartnerId = null;

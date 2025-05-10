@@ -9,6 +9,62 @@
         <p>Loading users...</p>
     </div>
 
+<style>
+    h1 {
+        text-align: center;
+        margin-bottom: 2rem;
+        font-weight: 600;
+    }
+
+    #users-list-container {
+        max-width: 600px;
+        margin: 0 auto;
+        background-color: #ffffff;
+        border-radius: 0.75rem;
+        box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.1);
+        padding: 1.5rem;
+    }
+
+    .list-group-item {
+        font-size: 1rem;
+        padding: 0.75rem 1rem;
+        border-radius: 0.5rem;
+        margin-bottom: 0.5rem;
+        transition: background-color 0.2s ease-in-out;
+    }
+
+    .list-group-item:hover {
+        background-color: #f1f1f1;
+    }
+
+    .list-group-item span {
+        font-weight: 500;
+    }
+
+    .alert {
+        margin-bottom: 0;
+    }
+
+    body {
+    background: linear-gradient(135deg, #a8c0ff, #3f7cac); /* Градиент синий/голубой */
+    background-size: 100% 100%; /* Растягиваем градиент на весь экран */
+    background-attachment: fixed; /* Фон будет фиксирован на экране */
+    background-position: center;
+    font-family: 'Arial', sans-serif;
+    color: #333;
+    height: 100vh; /* Задаем высоту 100% от экрана */
+    margin: 0; /* Убираем отступы */
+  }
+
+  /* Фон для контейнера с контентом */
+  .container {
+    background: rgba(255, 255, 255, 0.85); /* Белый фон с прозрачностью */
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+  }
+</style>
+
     <script>
         async function fetchUsers() {
             const token = localStorage.getItem('access_token');

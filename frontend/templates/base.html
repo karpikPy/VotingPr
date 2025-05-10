@@ -5,16 +5,55 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{% block title %}Poll App{% endblock %}</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <style>
+    /* Стиль для навбара */
+    .navbar {
+        background: linear-gradient(90deg, #1e3c72, #2a5298); /* Градиент от темно-синего к светло-синему */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Легкая тень */
+    }
+    .navbar-brand {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: white !important;
+    }
+    .nav-link {
+        color: white !important;
+        font-size: 1rem;
+        font-weight: 500;
+    }
+    .nav-link:hover {
+        color: #d0e7ff !important; /* Подсветка при наведении */
+        text-decoration: underline;
+    }
+    .navbar-toggler-icon {
+        background-color: white; /* Изменение цвета иконки на белый */
+    }
+
+    /* Подсветка активных элементов */
+    .nav-link.active {
+        color: #6ba3ff !important; /* Синий оттенок для активной ссылки */
+    }
+
+    /* Для кнопки выхода */
+    .nav-item#nav-leave a {
+        color: #4e73df !important; /* Синий для кнопки выхода */
+        font-weight: 600;
+    }
+    .nav-item#nav-leave a:hover {
+        color: #3b5b9d !important; /* Темно-синий для наведения */
+    }
+</style>
+
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <nav class="navbar navbar-expand-lg navbar-light">
         <div class="container-fluid">
             <a class="navbar-brand" href="/home">Poll App</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto mb-2 mb-lg-0"> {# Додаємо me-auto для вирівнювання #}
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                     <li class="nav-item">
                         <a class="nav-link active" aria-current="page" href="/home">Home</a>
                     </li>
@@ -23,18 +62,17 @@
                     </li>
                 </ul>
                 <ul class="navbar-nav">
-                    {# Ці елементи будуть приховані/відображені за допомогою JavaScript #}
                     <li class="nav-item" id="nav-users" style="display: none;">
                         <a class="nav-link" href="/users">Users</a>
                     </li>
                     <li class="nav-item" id="nav-login">
                         <a class="nav-link" href="/login">Login</a>
                     </li>
-                     <li class="nav-item" id="nav-register">
+                    <li class="nav-item" id="nav-register">
                         <a class="nav-link" href="/register">Register</a>
                     </li>
-                     <li class="nav-item d-none" id="nav-leave"> {# Приховано за замовчуванням #}
-                        <a class="nav-link" href="#" id="logout-link">Leave</a> {# Посилання для виходу #}
+                    <li class="nav-item d-none" id="nav-leave">
+                        <a class="nav-link" href="#" id="logout-link">Leave</a>
                     </li>
                 </ul>
             </div>
@@ -49,25 +87,21 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
 
     <script>
-
         const navLogin = document.getElementById('nav-login');
         const navRegister = document.getElementById('nav-register');
         const navLeave = document.getElementById('nav-leave');
         const logoutLink = document.getElementById('logout-link');
         const navUsers = document.getElementById('nav-users');
 
-
         function updateNavLinks() {
             const token = localStorage.getItem('access_token');
 
             if (token) {
-
                 navLogin.classList.add('d-none');
                 navRegister.classList.add('d-none');
                 navLeave.classList.remove('d-none');
                 navUsers.style.display = 'list-item';
             } else {
-
                 navLogin.classList.remove('d-none');
                 navRegister.classList.remove('d-none');
                 navLeave.classList.add('d-none');
@@ -75,21 +109,17 @@
             }
         }
 
-        
         logoutLink.addEventListener('click', function(event) {
-            event.preventDefault(); 
+            event.preventDefault();
 
-            localStorage.removeItem('access_token'); 
-            alert('Ви успішно вийшли з облікового запису.'); 
+            localStorage.removeItem('access_token');
+            alert('Ви успішно вийшли з облікового запису.');
 
-            
             updateNavLinks();
 
-           
-            window.location.href = '/home'; 
+            window.location.href = '/home';
         });
 
-        
         updateNavLinks();
     </script>
 </body>

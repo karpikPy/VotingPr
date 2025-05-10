@@ -3,36 +3,38 @@
 {% block title %}Polls - Poll App{% endblock %}
 
 {% block content %}
-    <h1 class="mb-4">Available Polls</h1>
+<div class="container py-5">
+  <h1 class="text-center fw-bold mb-5 text-primary">Список опитувань</h1>
 
-    <a href="/create_poll_page" class="btn btn-success mb-3">Create New Poll</a>
+  <a href="/create_poll_page" class="btn btn-success mb-4">Створити нове опитування</a>
 
-    <div class="row justify-content-center mb-4 g-3">
-      <div class="col-md-3">
-        <label for="activityFilter" class="form-label">Активність:</label>
-        <select id="activityFilter" class="form-select">
-          <option value="all">Всі</option>
-          <option value="active">Активні</option>
-          <option value="inactive">Завершенні</option>
-        </select>
-      </div>
-      <div class="col-md-3">
-        <label for="timeFilter" class="form-label">Період:</label>
-        <select id="timeFilter" class="form-select">
-          <option value="all">Всі</option>
-          <option value="today">Сьогодні</option>
-          <option value="week">Ця неділя</option>
-          <option value="month">Цей місяць</option>
-        </select>
-      </div>
-      <div class="col-md-2 d-flex align-items-end">
-        <button class="btn btn-primary w-100" onclick="loadPolls()">Застосувати</button>
-      </div>
+  <div class="row justify-content-center mb-5 g-3 px-3 py-3 rounded bg-white shadow-sm">
+    <div class="col-md-3">
+      <label for="activityFilter" class="form-label">Активність</label>
+      <select id="activityFilter" class="form-select">
+        <option value="all">Всі</option>
+        <option value="active">Активні</option>
+        <option value="inactive">Завершенні</option>
+      </select>
     </div>
-
-    <div id="polls-list">
-        <p>Loading polls...</p>
+    <div class="col-md-3">
+      <label for="timeFilter" class="form-label">Період</label>
+      <select id="timeFilter" class="form-select">
+        <option value="all">Всі</option>
+        <option value="today">Сьогодні</option>
+        <option value="week">Ця неділя</option>
+        <option value="month">Цей місяць</option>
+      </select>
     </div>
+    <div class="col-md-2 d-flex align-items-end">
+      <button class="btn btn-primary w-100" onclick="loadPolls()">Застосувати</button>
+    </div>
+  </div>
+
+  <div id="polls-list" class="row g-4">
+    <div class="text-center">Завантаження опитувань...</div>
+  </div>
+</div>
 
     {# Модальне вікно для редагування опитування #}
     <div class="modal fade" id="editPollModal" tabindex="-1" aria-labelledby="editPollModalLabel" aria-hidden="true">
@@ -79,6 +81,46 @@
         </div>
       </div>
     </div>
+
+<style>
+  /* Фон всей страницы */
+  body {
+    background: linear-gradient(135deg, #a8c0ff, #3f7cac); /* Градиент синий/голубой */
+    font-family: 'Arial', sans-serif;
+    color: #333;
+  }
+
+  /* Фон для контейнера с опросами */
+  .container {
+    background: rgba(255, 255, 255, 0.9); /* Белый фон с прозрачностью */
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+
+  /* Фон для карточек */
+  .card {
+    background: #f8f9fa;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  /* Заголовок списка опросов */
+  .text-primary {
+    color: #4a6cff !important; /* Глубокий синий цвет для заголовков */
+  }
+
+  /* Кнопки */
+  .btn {
+    border-radius: 50px; /* Округлые кнопки */
+  }
+
+  /* Модальные окна */
+  .modal-content {
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  }
+</style>
 
     <script>
     let currentUserId = null;
@@ -132,7 +174,7 @@
         container.innerHTML = '<div class="alert alert-warning text-center">Нет опросов по выбранным фильтрам.</div>';
         return;
       }
-      
+
       console.log('--- Rendering Polls ---');
       console.log('Current User ID (at renderPolls start):', currentUserId);
       console.log('Is Admin (at renderPolls start):', isAdmin);

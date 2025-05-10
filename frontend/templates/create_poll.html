@@ -28,6 +28,58 @@
         <button type="submit" class="btn btn-primary">Create Poll</button>
     </form>
 
+<style>
+    form#create-poll-form {
+        max-width: 600px;
+        margin: 0 auto;
+        background-color: #f9f9f9;
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    #create-poll-form .form-label {
+        font-weight: bold;
+    }
+
+    #create-poll-form .form-control {
+        border-radius: 8px;
+    }
+
+    #add-option-btn {
+        width: 100%;
+    }
+
+    #create-poll-form .btn-primary {
+        width: 100%;
+        margin-top: 10px;
+    }
+
+    h1.mb-4 {
+        text-align: center;
+        font-weight: 600;
+    }
+
+    body {
+    background: linear-gradient(135deg, #a8c0ff, #3f7cac); /* Градиент синий/голубой */
+    background-size: 100% 100%; /* Растягиваем градиент на весь экран */
+    background-attachment: fixed; /* Фон будет фиксирован на экране */
+    background-position: center;
+    font-family: 'Arial', sans-serif;
+    color: #333;
+    height: 100vh; /* Задаем высоту 100% от экрана */
+    margin: 0; /* Убираем отступы */
+  }
+
+  /* Фон для контейнера с контентом */
+  .container {
+    background: rgba(255, 255, 255, 0.85); /* Белый фон с прозрачностью */
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+  }
+</style>
+
     <script>
         document.getElementById('add-option-btn').addEventListener('click', function() {
             const optionsContainer = document.getElementById('options-container');
