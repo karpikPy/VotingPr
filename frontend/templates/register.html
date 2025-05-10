@@ -97,16 +97,16 @@
                 if (response.ok) {
                     const token = result.access_token;
                     localStorage.setItem('access_token', token);
-                    localStorage.setItem('success_message', 'Ви успішно зареєструвались та увійшли!');
+                    localStorage.setItem('success_message', 'Register and login successful');
 
                     window.location.href = '/home'; 
                 } else {
-                    const errorMessage = result.detail || 'Помилка реєстрації. Спробуйте інший email.';
+                    const errorMessage = result.detail || 'Register error. Try different email.';
                     alert(errorMessage); 
                 }
             } catch (error) {
                 console.error('Registration failed:', error);
-                alert('Виникла помилка під час реєстрації.');
+                alert('Register error.');
             }
         });
     </script>

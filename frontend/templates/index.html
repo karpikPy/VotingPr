@@ -75,34 +75,34 @@
 </head>
 <body class="bg-light">
   <div class="container py-5">
-    <h1 class="text-center fw-bold mb-5 text-primary">Список опитувань</h1>
+    <h1 class="text-center fw-bold mb-5 text-primary">Polls list</h1>
 
     <div class="row justify-content-center mb-4 g-3 filter-box">
       <div class="col-md-3">
-        <label for="activityFilter" class="form-label">Активність:</label>
+        <label for="activityFilter" class="form-label">Status:</label>
         <select id="activityFilter" class="form-select">
-          <option value="all">Всі</option>
-          <option value="active">Активні</option>
-          <option value="inactive">Завершенні</option>
+          <option value="all">All</option>
+          <option value="active">Active</option>
+          <option value="inactive">Expired</option>
         </select>
       </div>
       <div class="col-md-3">
-        <label for="timeFilter" class="form-label">Період:</label>
+        <label for="timeFilter" class="form-label">Created:</label>
         <select id="timeFilter" class="form-select">
-          <option value="all">Всі</option>
-          <option value="today">Сьогодні</option>
-          <option value="week">Ця неділя</option>
-          <option value="month">Цей місяць</option>
+          <option value="all">All</option>
+          <option value="today">Today</option>
+          <option value="week">This week</option>
+          <option value="month">This month</option>
         </select>
       </div>
       <div class="col-md-2 d-flex align-items-end">
-        <button class="btn btn-gradient w-100" onclick="loadPolls()">Застосувати</button>
+        <button class="btn btn-gradient w-100" onclick="loadPolls()">Filter</button>
       </div>
     </div>
 
     <div id="loadingSpinner" class="d-none text-center mb-4">
       <div class="spinner-border text-primary" role="status">
-        <span class="visually-hidden">Завантаження...</span>
+        <span class="visually-hidden">Loading...</span>
       </div>
     </div>
 
@@ -115,15 +115,15 @@
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title">Підтвердження</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+          <h5 class="modal-title">Confirm</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-          Ви справді хочете перейти до цього запиту
+          Are you sure you want to proceed with this request?
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Ні</button>
-          <button type="button" class="btn btn-success" id="confirmGoBtn">Перейти</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
+          <button type="button" class="btn btn-success" id="confirmGoBtn">Proceed</button>
         </div>
       </div>
     </div>

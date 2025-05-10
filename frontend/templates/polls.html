@@ -4,35 +4,35 @@
 
 {% block content %}
 <div class="container py-5">
-  <h1 class="text-center fw-bold mb-5 text-primary">Список опитувань</h1>
+  <h1 class="text-center fw-bold mb-5 text-primary">Poll list</h1>
 
-  <a href="/create_poll_page" class="btn btn-success mb-4">Створити нове опитування</a>
+  <a href="/create_poll_page" class="btn btn-success mb-4">Create new poll</a>
 
   <div class="row justify-content-center mb-5 g-3 px-3 py-3 rounded bg-white shadow-sm">
     <div class="col-md-3">
-      <label for="activityFilter" class="form-label">Активність</label>
+      <label for="activityFilter" class="form-label">Status</label>
       <select id="activityFilter" class="form-select">
-        <option value="all">Всі</option>
-        <option value="active">Активні</option>
-        <option value="inactive">Завершенні</option>
+        <option value="all">All</option>
+        <option value="active">Active</option>
+        <option value="inactive">Expired</option>
       </select>
     </div>
     <div class="col-md-3">
-      <label for="timeFilter" class="form-label">Період</label>
+      <label for="timeFilter" class="form-label">Created</label>
       <select id="timeFilter" class="form-select">
-        <option value="all">Всі</option>
-        <option value="today">Сьогодні</option>
-        <option value="week">Ця неділя</option>
-        <option value="month">Цей місяць</option>
+        <option value="all">All</option>
+        <option value="today">Today</option>
+        <option value="week">This week</option>
+        <option value="month">This month</option>
       </select>
     </div>
     <div class="col-md-2 d-flex align-items-end">
-      <button class="btn btn-primary w-100" onclick="loadPolls()">Застосувати</button>
+      <button class="btn btn-primary w-100" onclick="loadPolls()">Filter</button>
     </div>
   </div>
 
   <div id="polls-list" class="row g-4">
-    <div class="text-center">Завантаження опитувань...</div>
+    <div class="text-center">Loading polls...</div>
   </div>
 </div>
 
@@ -171,7 +171,7 @@
       const container = document.getElementById('polls-list');
       container.innerHTML = '';
       if (!polls.length) {
-        container.innerHTML = '<div class="alert alert-warning text-center">Нет опросов по выбранным фильтрам.</div>';
+        container.innerHTML = '<div class="alert alert-warning text-center">No polls corresponding to such filter.</div>';
         return;
       }
 

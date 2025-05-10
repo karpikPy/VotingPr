@@ -95,17 +95,17 @@
                     
                     const token = result.access_token;
                     localStorage.setItem('access_token', token); 
-                    localStorage.setItem('success_message', 'Ви успішно увійшли!'); 
+                    localStorage.setItem('success_message', 'Login successful');
 
                     window.location.href = '/home'; 
                 } else {
                     
-                    const errorMessage = result.detail || 'Помилка входу. Перевірте email та пароль.';
+                    const errorMessage = result.detail || 'Login error. Check email and password.';
                     alert(errorMessage); 
                 }
             } catch (error) {
                 console.error('Login failed:', error);
-                alert('Виникла помилка під час входу.');
+                alert('Error while logging in.');
             }
         });
     </script>
