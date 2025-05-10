@@ -7,307 +7,249 @@
 
     <a href="/create_poll_page" class="btn btn-success mb-3">Create New Poll</a>
 
+    <div class="row justify-content-center mb-4 g-3">
+      <div class="col-md-3">
+        <label for="activityFilter" class="form-label">Активність:</label>
+        <select id="activityFilter" class="form-select">
+          <option value="all">Всі</option>
+          <option value="active">Активні</option>
+          <option value="inactive">Завершенні</option>
+        </select>
+      </div>
+      <div class="col-md-3">
+        <label for="timeFilter" class="form-label">Період:</label>
+        <select id="timeFilter" class="form-select">
+          <option value="all">Всі</option>
+          <option value="today">Сьогодні</option>
+          <option value="week">Ця неділя</option>
+          <option value="month">Цей місяць</option>
+        </select>
+      </div>
+      <div class="col-md-2 d-flex align-items-end">
+        <button class="btn btn-primary w-100" onclick="loadPolls()">Застосувати</button>
+      </div>
+    </div>
+
     <div id="polls-list">
-        {# Polls will be loaded here by JavaScript #}
         <p>Loading polls...</p>
     </div>
 
     {# Модальне вікно для редагування опитування #}
     <div class="modal fade" id="editPollModal" tabindex="-1" aria-labelledby="editPollModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="editPollModalLabel">Edit Poll</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <input type="hidden" id="edit-poll-id">
-                    <div class="mb-3">
-                        <label for="edit-poll-title" class="form-label">Poll Title</label>
-                        <input type="text" class="form-control" id="edit-poll-title" required>
-                    </div>
-                    {# Можна додати поля для редагування опцій тут або в окремому модальному вікні #}
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary" id="save-poll-changes-btn">Save changes</button>
-                </div>
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="editPollModalLabel">Edit Poll</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <input type="hidden" id="edit-poll-id">
+            <div class="mb-3">
+              <label for="edit-poll-title" class="form-label">Poll Title</label>
+              <input type="text" class="form-control" id="edit-poll-title" required>
             </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-primary" id="save-poll-changes-btn">Save changes</button>
+          </div>
         </div>
+      </div>
     </div>
 
-     {# Модальне вікно для редагування опції #}
+    {# Модальне вікно для редагування опції #}
     <div class="modal fade" id="editOptionModal" tabindex="-1" aria-labelledby="editOptionModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="editOptionModalLabel">Edit Option</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <input type="hidden" id="edit-option-id">
-                    <div class="mb-3">
-                        <label for="edit-option-text" class="form-label">Option Text</label>
-                        <input type="text" class="form-control" id="edit-option-text" required>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary" id="save-option-changes-btn">Save changes</button>
-                </div>
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="editOptionModalLabel">Edit Option</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <input type="hidden" id="edit-option-id">
+            <div class="mb-3">
+              <label for="edit-option-text" class="form-label">Option Text</label>
+              <input type="text" class="form-control" id="edit-option-text" required>
             </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-primary" id="save-option-changes-btn">Save changes</button>
+          </div>
         </div>
+      </div>
     </div>
-
 
     <script>
-        let currentUserId = null; 
-        let isAdmin = false; 
+    let currentUserId = null;
+    let isAdmin = false;
 
-        async function fetchCurrentUser() {
-            const token = localStorage.getItem('access_token');
-            if (!token) {
-                currentUserId = null;
-                isAdmin = false;
-                return null;
-            }
 
-            try {
-                const response = await fetch('/users/me', {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
+    async function fetchCurrentUser() {
+      const token = localStorage.getItem('access_token');
+      if (!token) {
+        currentUserId = null;
+        isAdmin = false;
+        return;
+      }
+      try {
+        const res = await fetch('/api/users/me', { headers: { 'Authorization': `Bearer ${token}` } });
+        if (res.ok) {
+          const user = await res.json();
+          currentUserId = user.id;
+          isAdmin = user.is_admin;
+        } else {
+          currentUserId = null;
+          isAdmin = false;
+        }
+      } catch (err) {
+        console.error(err);
+        currentUserId = null;
+        isAdmin = false;
+      }
+    }
 
-                if (response.ok) {
-                    const user = await response.json();
-                    currentUserId = user.id;
-                    isAdmin = user.is_admin;
-                    return user;
-                } else {
-                    currentUserId = null;
-                    isAdmin = false;
-                  
-                    return null;
-                }
-            } catch (error) {
-                console.error('Failed to fetch current user:', error);
-                currentUserId = null;
-                isAdmin = false;
-                return null;
-            }
+    async function loadPolls() {
+      const activity = document.getElementById('activityFilter').value;
+      const time = document.getElementById('timeFilter').value;
+      const params = new URLSearchParams();
+      if (activity !== 'all') params.append('activity', activity);
+      if (time !== 'all') params.append('time', time);
+      const url = '/api/polls' + (params.toString() ? '?' + params.toString() : '');
+      try {
+        const res = await fetch(url);
+        const polls = await res.json();
+        renderPolls(polls);
+      } catch (err) {
+        console.error('Error loading polls:', err);
+      }
+    }
+
+    function renderPolls(polls) {
+      const container = document.getElementById('polls-list');
+      container.innerHTML = '';
+      if (!polls.length) {
+        container.innerHTML = '<div class="alert alert-warning text-center">Нет опросов по выбранным фильтрам.</div>';
+        return;
+      }
+      
+      console.log('--- Rendering Polls ---');
+      console.log('Current User ID (at renderPolls start):', currentUserId);
+      console.log('Is Admin (at renderPolls start):', isAdmin);
+
+      polls.forEach(poll => {
+        console.log(`Processing poll ID: ${poll.id}, Title: "${poll.title}", Creator ID: ${poll.creator_id}`);
+
+        const card = document.createElement('div');
+        card.className = 'card mb-3';
+
+        let adminOrCreatorControls = '';
+        const showAdminControlsCondition = isAdmin || (currentUserId && currentUserId === poll.creator_id);
+        console.log(`Poll ID: ${poll.id} - Show Admin Controls Condition: ${showAdminControlsCondition}`);
+
+        if (showAdminControlsCondition) {
+            adminOrCreatorControls = `
+                <button class="btn btn-sm btn-outline-danger delete-poll-btn" data-id="${poll.id}">Delete Poll</button>
+                <button class="btn btn-sm btn-outline-secondary ms-2 edit-poll-btn" data-id="${poll.id}" data-title="${poll.title}">Edit Poll</button>
+            `;
         }
 
+        card.innerHTML = `
+          <div class="card-body">
+            <h5 class="card-title">${poll.title}</h5>
+            <p class="card-text"><small class="text-muted">Creator ID: ${poll.creator_id}${poll.expires_at ? ' - Expires: ' + new Date(poll.expires_at).toLocaleString() : ' - No Expiration'}</small></p>
+            <ul class="list-group list-group-flush">
+              ${poll.options.map(option => `
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                  ${option.text}
+                  <span class="badge bg-primary rounded-pill">${option.votes}</span>
+                  <button class="btn btn-sm btn-outline-primary vote-btn" data-id="${option.id}" ${!currentUserId ? 'disabled title="Log in to vote"' : ''}>Vote</button>
+                  ${(isAdmin || (currentUserId && currentUserId === poll.creator_id)) ? `<button class="btn btn-sm btn-outline-secondary ms-2 edit-option-btn" data-id="${option.id}" data-text="${option.text}">Edit Option</button>` : ''}
+                </li>
+              `).join('')}
+            </ul>
+            <div class="mt-3">
+              ${adminOrCreatorControls}
+            </div>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+      console.log('--- Finished Rendering Polls ---');
+      attachEventHandlers();
+    }
 
-        async function fetchPolls() {
-            const response = await fetch('/polls');
-            const polls = await response.json();
-            const pollsListDiv = document.getElementById('polls-list');
-            pollsListDiv.innerHTML = ''; 
+    function attachEventHandlers() {
+      document.querySelectorAll('.vote-btn').forEach(btn => btn.onclick = vote);
+      document.querySelectorAll('.delete-poll-btn').forEach(btn => btn.onclick = deletePoll);
+      document.querySelectorAll('.edit-poll-btn').forEach(btn => btn.onclick = openEditPollModal); // Corrected assignment
+      document.querySelectorAll('.edit-option-btn').forEach(btn => btn.onclick = openEditOptionModal); // Corrected assignment
+    }
 
-            if (polls.length === 0) {
-                pollsListDiv.innerHTML = '<p>No polls available yet.</p>';
-                return;
-            }
-
-            polls.forEach(poll => {
-                const pollElement = document.createElement('div');
-                pollElement.classList.add('card', 'mb-3');
-                pollElement.innerHTML = `
-                    <div class="card-body">
-                        <h5 class="card-title">${poll.title}</h5>
-                        <ul class="list-group list-group-flush">
-                            ${poll.options.map(option => `
-                                <li class="list-group-item d-flex justify-content-between align-items-center">
-                                    ${option.text}
-                                    <span class="badge bg-primary rounded-pill">${option.votes} votes</span>
-                                    <button class="btn btn-sm btn-outline-primary vote-btn" data-option-id="${option.id}">Vote</button>
-                                    ${(isAdmin || (currentUserId !== null && poll.creator_id === currentUserId)) ? `<button class="btn btn-sm btn-outline-secondary edit-option-btn ms-2" data-option-id="${option.id}" data-option-text="${option.text}">Edit Option</button>` : ''} {# Кнопка редагування опції для адміна або творця #}
-                                </li>
-                            `).join('')}
-                        </ul>
-                        ${(isAdmin || (currentUserId !== null && poll.creator_id === currentUserId)) ? `
-                            <div class="mt-3">
-                                <button class="btn btn-sm btn-outline-danger delete-poll-btn" data-poll-id="${poll.id}">Delete Poll</button> {# Кнопка видалення опитування для адміна або творця #}
-                                <button class="btn btn-sm btn-outline-secondary edit-poll-btn ms-2" data-poll-id="${poll.id}" data-poll-title="${poll.title}">Edit Poll</button> {# Кнопка редагування опитування для адміна або творця #}
-                            </div>
-                        ` : ''}
-                    </div>
-                `;
-                pollsListDiv.appendChild(pollElement);
-            });
-
-
-            document.querySelectorAll('.vote-btn').forEach(button => {
-                button.addEventListener('click', async function() {
-                    const optionId = this.dataset.optionId;
-                    const token = localStorage.getItem('access_token');
-
-                    const voteResponse = await fetch('/votes/', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            ...(token && { 'Authorization': `Bearer ${token}` })
-                        },
-                        body: JSON.stringify({ poll_option_id: parseInt(optionId) }),
-                    });
-
-                    if (voteResponse.ok) {
-                        alert('Vote recorded!');
-                        fetchPolls(); 
-                    } else {
-                        if (voteResponse.status === 401) {
-                            alert('User not authorized. Please log in to vote.');
-                        } else {
-                            alert('Failed to record vote.');
-                        }
-                    }
-                });
-            });
-
-
-            document.querySelectorAll('.delete-poll-btn').forEach(button => {
-                button.addEventListener('click', async function() {
-                    const pollId = this.dataset.pollId;
-                    if (confirm('Are you sure you want to delete this poll?')) {
-                        const token = localStorage.getItem('access_token');
-                        if (!token) {
-                             alert('You must be logged in to delete polls.');
-                             return;
-                        }
-                        try {
-                            const response = await fetch(`/polls/${pollId}`, {
-                                method: 'DELETE',
-                                headers: {
-                                    'Authorization': `Bearer ${token}`
-                                }
-                            });
-
-                            if (response.ok) {
-                                alert('Poll deleted successfully!');
-                                fetchPolls(); 
-                            } else if (response.status === 401 || response.status === 403) {
-                                 alert('You are not authorized to delete this poll.');
-                            }
-                            else {
-                                alert('Failed to delete poll.');
-                            }
-                        } catch (error) {
-                            console.error('Delete poll failed:', error);
-                            alert('An error occurred while deleting the poll.');
-                        }
-                    }
-                });
-            });
-
-            document.querySelectorAll('.edit-poll-btn').forEach(button => {
-                button.addEventListener('click', function() {
-                    const pollId = this.dataset.pollId;
-                    const pollTitle = this.dataset.pollTitle;
-                    document.getElementById('edit-poll-id').value = pollId;
-                    document.getElementById('edit-poll-title').value = pollTitle;
-                    const editPollModal = new bootstrap.Modal(document.getElementById('editPollModal'));
-                    editPollModal.show();
-                });
-            });
-
-
-            document.querySelectorAll('.edit-option-btn').forEach(button => {
-                button.addEventListener('click', function() {
-                    const optionId = this.dataset.optionId;
-                    const optionText = this.dataset.optionText;
-
-                    document.getElementById('edit-option-id').value = optionId;
-                    document.getElementById('edit-option-text').value = optionText;
-
-                    const editOptionModal = new bootstrap.Modal(document.getElementById('editOptionModal'));
-                    editOptionModal.show();
-                });
-            });
-        }
-
-
-        document.getElementById('save-poll-changes-btn').addEventListener('click', async function() {
-            const pollId = document.getElementById('edit-poll-id').value;
-            const newTitle = document.getElementById('edit-poll-title').value;
-            const token = localStorage.getItem('access_token');
-
-            if (!token) {
-                 alert('You must be logged in to edit polls.');
-                 return;
-            }
-
-            try {
-                const response = await fetch(`/polls/${pollId}`, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify({ title: newTitle })
-                });
-
-                if (response.ok) {
-                    alert('Poll updated successfully!');
-
-                    const editPollModal = bootstrap.Modal.getInstance(document.getElementById('editPollModal'));
-                    editPollModal.hide();
-                    fetchPolls(); 
-                } else if (response.status === 401 || response.status === 403) {
-                     alert('You are not authorized to edit this poll.');
-                }
-                else {
-                    alert('Failed to update poll.');
-                }
-            } catch (error) {
-                console.error('Update poll failed:', error);
-                alert('An error occurred while updating the poll.');
-            }
+    async function vote() {
+      const optionId = this.dataset.id;
+      const token = localStorage.getItem('access_token');
+      try {
+        const res = await fetch('/api/votes/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(token && { 'Authorization': `Bearer ${token}` })
+          },
+          body: JSON.stringify({ poll_option_id: +optionId })
         });
-
-        document.getElementById('save-option-changes-btn').addEventListener('click', async function() {
-            const optionId = document.getElementById('edit-option-id').value;
-            const newText = document.getElementById('edit-option-text').value;
-            const token = localStorage.getItem('access_token');
-
-            if (!token) {
-                 alert('You must be logged in to edit options.');
-                 return;
-            }
-
-            try {
-                const response = await fetch(`/polls/options/${optionId}`, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify({ text: newText })
-                });
-
-                if (response.ok) {
-                    alert('Option updated successfully!');
-
-                    const editOptionModal = bootstrap.Modal.getInstance(document.getElementById('editOptionModal'));
-                    editOptionModal.hide();
-                    fetchPolls(); 
-                } else if (response.status === 401 || response.status === 403) {
-                     alert('You are not authorized to edit this option.');
-                }
-                else {
-                    alert('Failed to update option.');
-                }
-            } catch (error) {
-                console.error('Update option failed:', error);
-                alert('An error occurred while updating the option.');
-            }
-        });
+        if (res.ok) loadPolls();
+        else if (res.status === 401) alert('Please log in to vote.');
+      } catch (err) { console.error(err); }
+    }
 
 
-        fetchCurrentUser().then(() => {
-            fetchPolls();
-        });
+    async function deletePoll() {
+      const id = this.dataset.id;
+      if (!confirm('Delete this poll?')) return;
+      const token = localStorage.getItem('access_token');
+      try {
+        const res = await fetch(`/api/polls/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` }});
+        if (res.ok) loadPolls(); else alert('Failed to delete.');
+      } catch (err) { console.error(err); }
+    }
 
+    function openEditPollModal() {
+      const id = this.dataset.id;
+      const title = this.dataset.title;
+      document.getElementById('edit-poll-id').value = id;
+      document.getElementById('edit-poll-title').value = title;
+      new bootstrap.Modal(document.getElementById('editPollModal')).show();
+    }
+
+    function openEditOptionModal() {
+      const id = this.dataset.id;
+      const text = this.dataset.text;
+      document.getElementById('edit-option-id').value = id;
+      document.getElementById('edit-option-text').value = text;
+      new bootstrap.Modal(document.getElementById('editOptionModal')).show();
+    }
+
+    document.getElementById('save-poll-changes-btn').addEventListener('click', async () => {
+      const id = document.getElementById('edit-poll-id').value;
+      const title = document.getElementById('edit-poll-title').value;
+      const token = localStorage.getItem('access_token');
+      try {
+        const res = await fetch(`/api/polls/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, body: JSON.stringify({ title }) });
+        if (res.ok) { bootstrap.Modal.getInstance(document.getElementById('editPollModal')).hide(); loadPolls(); } else alert('Update failed');
+      } catch (err) { console.error(err); }
+    });
+
+    document.getElementById('save-option-changes-btn').addEventListener('click', async () => {
+      const id = document.getElementById('edit-option-id').value;
+      const text = document.getElementById('edit-option-text').value;
+      const token = localStorage.getItem('access_token');
+      try {
+        const res = await fetch(`/api/polls/options/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, body: JSON.stringify({ text }) });
+        if (res.ok) { bootstrap.Modal.getInstance(document.getElementById('editOptionModal')).hide(); loadPolls(); } else alert('Update failed');
+      } catch (err) { console.error(err); }
+    });
+
+    window.onload = async () => { await fetchCurrentUser(); loadPolls(); };
     </script>
 {% endblock %}
-

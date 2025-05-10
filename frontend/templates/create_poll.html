@@ -9,6 +9,11 @@
             <label for="poll-title" class="form-label">Poll Title</label>
             <input type="text" class="form-control" id="poll-title" name="title" required>
         </div>
+
+        <div class="mb-3">
+            <label for="poll-expiration" class="form-label">Expiration Date</label>
+            <input type="datetime-local" class="form-control" id="poll-expiration" name="expires_at">
+        </div>
         <div id="options-container">
             <div class="mb-3">
                 <label for="option-1" class="form-label">Option 1</label>
@@ -40,24 +45,37 @@
             event.preventDefault();
 
             const title = document.getElementById('poll-title').value;
+            const rawDate = document.getElementById('poll-expiration').value;
+
+            if (rawDate) {
+                const expirationDate = new Date(rawDate);
+                const now = new Date();
+                if (expirationDate <= now) {
+                    alert('Expiration date must be in the future.');
+                    return; // Prevent form submission
+                }
+            }
+
+            const expiresAt = rawDate ? new Date(rawDate).toISOString() : null;
+
             const optionInputs = document.querySelectorAll('#options-container input[name="options[]"]');
             const options = Array.from(optionInputs).map(input => ({ text: input.value }));
 
-            const token = localStorage.getItem('access_token'); 
+            const token = localStorage.getItem('access_token');
 
             if (!token) {
                 alert('You must be logged in to create polls.');
-                
-                return; 
+
+                return;
             }
 
-            const pollResponse = await fetch('/polls', { 
+            const pollResponse = await fetch('/api/polls', { // Added /api
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
-                body: JSON.stringify({ title: title }),
+               body: JSON.stringify({ title: title, expires_at: expiresAt }),
             });
 
             if (!pollResponse.ok) {
@@ -73,7 +91,7 @@
             const pollId = poll.id;
 
             for (const option of options) {
-                const optionResponse = await fetch(`/polls/${pollId}/options/`, {
+                const optionResponse = await fetch(`/api/polls/${pollId}/options/`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -90,7 +108,7 @@
             }
 
             alert('Poll created successfully!');
-            window.location.href = '/polls_page'; 
+            window.location.href = '/home';
         });
     </script>
 {% endblock %}

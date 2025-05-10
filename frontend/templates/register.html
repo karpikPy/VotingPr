@@ -4,7 +4,7 @@
 
 {% block content %}
     <h1 class="mb-4">Register</h1>
-    <form id="register-form"> {# Додаємо ID для форми #}
+    <form id="register-form">
         <div class="mb-3">
             <label for="username" class="form-label">Username</label>
             <input type="text" class="form-control" id="username" name="username" required>
@@ -23,25 +23,25 @@
 
     <script>
         document.getElementById('register-form').addEventListener('submit', async function(event) {
-            event.preventDefault(); 
+            event.preventDefault();
 
             const form = event.target;
             const formData = new FormData(form);
-            
+
 
             try {
-                const response = await fetch('/register', {
+                const response = await fetch('/api/register', {
                     method: 'POST',
-                     
+
                     body: formData
                 });
 
-                const result = await response.json(); 
+                const result = await response.json();
 
-                if (response.ok) { 
+                if (response.ok) {
                     const token = result.access_token;
-                    localStorage.setItem('access_token', token); 
-                    localStorage.setItem('success_message', 'Ви успішно зареєструвались та увійшли!'); // Зберігаємо повідомлення
+                    localStorage.setItem('access_token', token);
+                    localStorage.setItem('success_message', 'Ви успішно зареєструвались та увійшли!');
 
                     window.location.href = '/home'; 
                 } else {

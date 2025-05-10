@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block title %}Users - Poll App{% endblock %}
+
+{% block content %}
+    <h1 class="mb-4">Available Users for Chat</h1>
+
+    <div id="users-list-container" class="list-group">
+        <p>Loading users...</p>
+    </div>
+
+    <script>
+        async function fetchUsers() {
+            const token = localStorage.getItem('access_token');
+            if (!token) {
+                document.getElementById('users-list-container').innerHTML = '<p class="alert alert-warning">You must be logged in to see other users.</p>';
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/users', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                const usersListContainer = document.getElementById('users-list-container');
+                usersListContainer.innerHTML = ''; // Clear loading message
+
+                if (response.ok) {
+                    const users = await response.json();
+                    if (users.length === 0) {
+                        usersListContainer.innerHTML = '<p class="alert alert-info">No other users found.</p>';
+                    } else {
+                        users.forEach(user => {
+                            const userElement = document.createElement('a');
+                            userElement.href = `/chat/${user.id}`;
+                            userElement.className = 'list-group-item list-group-item-action d-flex justify-content-between align-items-center';
+                            
+                            const usernameSpan = document.createElement('span');
+                            usernameSpan.textContent = user.username;
+
+                            const chatButton = document.createElement('button');
+                            chatButton.className = 'btn btn-primary btn-sm';
+                            chatButton.textContent = 'Chat';
+
+                            userElement.appendChild(usernameSpan);
+                            
+                            usersListContainer.appendChild(userElement);
+                        });
+                    }
+                } else {
+                    const errorData = await response.json();
+                    usersListContainer.innerHTML = `<p class="alert alert-danger">Error loading users: ${errorData.detail || response.statusText}</p>`;
+                }
+            } catch (error) {
+                console.error('Failed to fetch users:', error);
+                document.getElementById('users-list-container').innerHTML = '<p class="alert alert-danger">An error occurred while fetching users.</p>';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', fetchUsers);
+    </script>
+{% endblock %}
