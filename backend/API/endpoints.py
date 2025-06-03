@@ -14,7 +14,7 @@ from .schemas import (
     PollOption as PollOptionSchema,
     User as UserSchema
 )
-from .models import ChatMessage, User, Poll, PollOption
+from .models import ChatMessage, User, Poll, PollOption, Vote
 from auth.auth import (get_password_hash,
                        verify_password,
                        create_access_token,
@@ -42,7 +42,9 @@ def get_polls(
         activity: Optional[str] = Query(None),
         time: Optional[str] = Query(None)
 ):
-    query = db.query(Poll).options(joinedload(Poll.options)).order_by(Poll.created_at.desc())
+    query = db.query(Poll).options(
+        joinedload(Poll.options).joinedload(PollOption.vote_records)
+    ).order_by(Poll.created_at.desc())
 
     now_utc = datetime.utcnow()
 
@@ -69,6 +71,11 @@ def get_polls(
                                  func.extract('month', Poll.created_at) == now_utc.month)
 
     polls = query.all()
+
+    for poll in polls:
+        for option in poll.options:
+            option.votes = len(option.vote_records)
+
     return polls
 
 
@@ -166,11 +173,33 @@ async def vote_for_option(
         db: Session = Depends(get_db),
         current_user: User = Depends(get_current_user)
 ):
-    db_option = db.query(PollOption).filter(PollOption.id == vote.poll_option_id).first()
+    db_option = db.query(PollOption).options(joinedload(PollOption.poll)).filter(
+        PollOption.id == vote.poll_option_id).first()
     if db_option is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Опція опитування не знайдена")
 
+    if db_option.poll.expires_at and db_option.poll.expires_at <= datetime.utcnow():
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Опитування закінчилося")
+
+    existing_vote = db.query(Vote).join(PollOption).filter(
+        Vote.user_id == current_user.id,
+        PollOption.poll_id == db_option.poll_id
+    ).first()
+
+    if existing_vote:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Ви вже проголосували в цьому опитуванні"
+        )
+
+    new_vote = Vote(
+        user_id=current_user.id,
+        poll_option_id=vote.poll_option_id
+    )
+    db.add(new_vote)
+
     db_option.votes += 1
+
     db.commit()
     db.refresh(db_option)
     return db_option

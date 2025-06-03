@@ -61,6 +61,19 @@ class VoteCreate(BaseModel):
     poll_option_id: int
 
 
+class VoteBase(BaseModel):
+    poll_option_id: int
+
+
+class Vote(VoteBase):
+    id: int
+    user_id: int
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
 class ChatMessageBase(BaseModel):
     sender_id: int
     receiver_id: int
